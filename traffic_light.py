@@ -63,7 +63,8 @@ class A14MiltonRoadRoundabout():
         for trafficlight in self.traffic_lights_roundabout:
             trafficlight.is_in_roundabout = True
         self.traffic_lights = self.traffic_lights_enter + self.traffic_lights_roundabout
-        traffic_lights_enter_modified = [self.traffic_lights_enter[1:], self.traffic_lights_enter[0]]
+        traffic_lights_enter_modified = self.traffic_lights_enter[1:]
+        traffic_lights_enter_modified.append(self.traffic_lights_enter[0])
         #Setup Paired traffifc lights
         for i in range(num_traffic_lights):
             self.traffic_lights_enter[i].setPairedTrafficLight(self.traffic_lights_roundabout[i])
