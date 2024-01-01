@@ -18,6 +18,8 @@ class Environment():
         #Start running the simulation in a seperate thread
         thread = threading.Thread(target=self.car_simulation.run_simulation, daemon=True)
         thread.start()
+        thread = threading.Thread(target=self.car_simulation.watch_simulation, daemon=True)
+        thread.start()
 
     def get_state(self):
         num_cars_waiting_at_start = 0
@@ -52,19 +54,32 @@ class CarSimulation():
         self.num_cars = num_cars
         self.num_traffic_lights = num_traffic_lights
         self.cars = None
+        self.traffic_lights = None
         # self.reset_simulation()
     
     def reset_simulation(self, traffic_lights):
         self.cars = [traffic_light.Car() for _ in range(self.num_cars)]
+        self.traffic_lights = traffic_lights
         #Assign the cars to the starting lights
         for idx, car in enumerate(self.cars):
             self.cars[idx].set_current_traffic_light(traffic_lights[random.randint(0, self.num_traffic_lights)])
 
     #Debugging function to run in a seperate thread
-    def watch_simulation():
-        pass
+    def watch_simulation(self):
+        while True:
+            time.sleep(10)
+            # car = self.cars[0]
+            for idx, traffic_light in enumerate(self.traffic_lights):
+                traffic_light_status = 'on' if traffic_light.getState() else 'off'
+                traffic_light_roundabout = traffic_light.is_in_roundabout
+                print('Traffic Light {} is {} and is in roundabout? {}'.format(idx, traffic_light_status, traffic_light_roundabout))        
+            for idx, car in enumerate(self.cars):
+                traffic_light = self.traffic_lights.index(car.get_current_traffic_light())
+                traffic_light_status = car.get_current_traffic_light().getState()
+                traffic_light_status = 'on' if traffic_light_status else 'off'
+                print('Car {} is currently at traffic light {} which is {}'.format(idx, traffic_light, traffic_light_status))
 
-    
+
     def getCars(self):
         return self.cars
 

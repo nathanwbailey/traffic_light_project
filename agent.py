@@ -52,6 +52,8 @@ class Agent():
             action_idx_1 = random.randint(0, self.action_dim_traffic_light-1)
             action_idx_2 = random.randint(0, self.action_dim_on_off-1)
         self.steps_done += 1
+        print(action_idx_1)
+        print(action_idx_2)
         return action_idx_1, action_idx_2
     
     def plot_durations(self):
@@ -131,13 +133,15 @@ class Agent():
         for episode in range (episodes):
             env.reset_env()
             state = env.get_state()
+            print(state)
             state = torch.tensor(state, dtype=torch.float32, device=self.device)
             for c in count():
                 action_1, action_2 = self.take_action(state)
                 reward = env.take_action(action_1, action_2)
-                time.sleep(5)
+                time.sleep(3)
                 reward = torch.tensor([reward], device=self.device)
                 print(reward)
+                print(self.eps)
                 action_1 = torch.tensor([action_1], device=self.device)
                 action_2 = torch.tensor([action_2], device=self.device)
                 next_state = env.get_state()
