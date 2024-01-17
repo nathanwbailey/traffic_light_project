@@ -2,5 +2,5 @@ traffic_light/
 __pycache__/
 graphs/
 graphs_old/
-nohup*
+nohup*.out
 plot.txt
