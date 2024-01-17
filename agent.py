@@ -41,20 +41,23 @@ class Agent():
         #Decay and cap the epsilon value
         self.eps = self.eps*self.EPS_DECAY_VALUE
         self.eps = max(self.eps, self.EPS_END)
-        #Take a random action
+        type_action = 'random'
+        #Take a greedy action
         if self.eps < np.random.rand():
+            print('Greedy Action')
+            type_action = 'greedy'
             state = state[None, :]
             action_1, action_2 = self.policy_net(state)
             action_idx_1 = torch.argmax(action_1, dim=1).item()
             action_idx_2 = torch.argmax(action_2, dim=1).item()
-        #Else take a greedy action
+        #Else take a random action
         else:
+            print('Random Action')
             action_idx_1 = random.randint(0, self.action_dim_traffic_light-1)
             action_idx_2 = random.randint(0, self.action_dim_on_off-1)
         self.steps_done += 1
-        print(action_idx_1)
-        print(action_idx_2)
-        return action_idx_1, action_idx_2
+        print('Taking action on Traffic Light {}. Action is {}'.format(action_idx_1, action_idx_2))
+        return type_action, action_idx_1, action_idx_2
     
     def plot_durations(self):
         plt.figure(1)
@@ -71,7 +74,7 @@ class Agent():
             means = torch.cat((torch.zeros(99), means))
             plt.plot(means.numpy())
         plt.pause(0.001)  # pause a bit so that plots are updated
-        plt.savefig(self.network_type+'_training.png')
+        plt.savefig('training4_more_eps_decay_print_action2.png')
 
 
     def update_target_network(self):
@@ -136,17 +139,18 @@ class Agent():
             print(state)
             state = torch.tensor(state, dtype=torch.float32, device=self.device)
             for c in count():
-                action_1, action_2 = self.take_action(state)
-                reward = env.take_action(action_1, action_2)
-                time.sleep(3)
+                type_action, action_1, action_2 = self.take_action(state)
+                env.take_action(action_1, action_2)
+                time.sleep(5)
+                reward = env.compute_reward()
                 reward = torch.tensor([reward], device=self.device)
-                print(reward)
-                print(self.eps)
+                print('Type of action is {} and Reward is {}'.format(type_action, reward.item()))
+                print('EPS is {}'.format(self.eps))
                 action_1 = torch.tensor([action_1], device=self.device)
                 action_2 = torch.tensor([action_2], device=self.device)
                 next_state = env.get_state()
                 next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
-                done = False
+                done = env.is_done()
                 if done:
                     next_state = None
                 #Cache a tuple of the date
@@ -163,9 +167,9 @@ class Agent():
                     self.plot_durations()
                     print("EPS: {}".format(self.eps))
                     print("Durations: {}".format(c+1))
-                    print("Score: {}".format(env.score()))
-                    torch.save(self.target_net.state_dict(), self.network_type+'_target_net.pt')
-                    torch.save(self.policy_net.state_dict(), self.network_type+'_policy_net.pt')
+                    # print("Score: {}".format(env.score()))
+                    torch.save(self.target_net.state_dict(), 'target_net.pt')
+                    torch.save(self.policy_net.state_dict(), 'policy_net.pt')
                     #Start a new episode
                     break
 

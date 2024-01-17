@@ -1,2 +1,6 @@
 traffic_light/
 __pycache__/
+graphs/
+graphs_old/
+nohup*
+plot.txt
